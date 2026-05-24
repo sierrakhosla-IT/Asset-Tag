@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Device Status Tag</title>
+  <style>
+    :root {
+      --ink: #111;
+      --muted: #555;
+      --line: #222;
+      --paper: #fff;
+      --stock: #1f7a3a;
+      --assigned: #145c9e;
+      --reimage: #b46100;
+      --repair: #b00020;
+      --hold: #6b3fa0;
+      --retired: #666;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #f3f3f3;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 14px;
+    }
+
+    .app {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid var(--ink);
+      background: var(--paper);
+      color: var(--ink);
+      padding: 8px 11px;
+      min-height: 36px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.primary {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(280px, 340px) 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .entry-panel,
+    .preview-wrap {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      padding: 14px;
+    }
+
+    .section-title {
+      margin: 0 0 10px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 6px;
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      padding: 8px;
+      color: var(--ink);
+      font: inherit;
+      font-weight: 700;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 58px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      padding: 8px;
+      color: var(--ink);
+      font: inherit;
+      font-weight: 700;
+      resize: vertical;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .print-sheet {
+      width: 3.75in;
+      margin: 0 auto;
+      padding: 0.18in;
+      background: var(--paper);
+      color: var(--ink);
+    }
+
+    .cut-wrap {
+      position: relative;
+      padding: 0.08in;
+      border: 1.5px dashed #666;
+    }
+
+    .cut-wrap::after {
+      content: "CUT";
+      position: absolute;
+      right: 0;
+      bottom: -0.16in;
+      font-size: 6.5px;
+      font-weight: 700;
+      color: #333;
+      background: var(--paper);
+      padding-left: 0.04in;
+    }
+
+    .tag {
+      width: 3.2in;
+      min-height: 4.35in;
+      border: 2px solid var(--line);
+      border-left: 0.06in solid var(--line);
+      background: var(--paper);
+      break-inside: avoid;
+    }
+
+    .tag[data-status="In Stock"] {
+      border-left-color: var(--stock);
+    }
+
+    .tag[data-status="Assigned"] {
+      border-left-color: var(--assigned);
+    }
+
+    .tag[data-status="Reimage"] {
+      border-left-color: var(--reimage);
+    }
+
+    .tag[data-status="Repair"] {
+      border-left-color: var(--repair);
+    }
+
+    .tag[data-status="Hold"] {
+      border-left-color: var(--hold);
+    }
+
+    .tag[data-status="Retired"] {
+      border-left-color: var(--retired);
+    }
+
+    .tag-header {
+      padding: 0.11in 0.13in;
+      background: var(--ink);
+      color: var(--paper);
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .top-section {
+      padding: 0.16in 0.16in 0.12in;
+      border-bottom: 2px solid var(--line);
+    }
+
+    .tag[data-status="In Stock"] .top-section {
+      border-top: 0.035in solid var(--stock);
+    }
+
+    .tag[data-status="Assigned"] .top-section {
+      border-top: 0.035in solid var(--assigned);
+    }
+
+    .tag[data-status="Reimage"] .top-section {
+      border-top: 0.035in solid var(--reimage);
+    }
+
+    .tag[data-status="Repair"] .top-section {
+      border-top: 0.035in solid var(--repair);
+    }
+
+    .tag[data-status="Hold"] .top-section {
+      border-top: 0.035in solid var(--hold);
+    }
+
+    .tag[data-status="Retired"] .top-section {
+      border-top: 0.035in solid var(--retired);
+    }
+
+    .bottom-section {
+      padding: 0.14in 0.16in 0.16in;
+    }
+
+    .print-field {
+      padding: 0.06in 0 0.07in;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 0.045in;
+      color: var(--muted);
+      font-size: 8px;
+      font-weight: 700;
+      line-height: 1;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .field-value {
+      display: block;
+      min-height: 0.25in;
+      border-bottom: 1px solid #aaa;
+      padding-bottom: 0.035in;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.1;
+      overflow-wrap: anywhere;
+    }
+
+    .status-value {
+      min-height: 0.48in;
+      border-bottom: 2px solid var(--ink);
+      font-size: 26px;
+      line-height: 1;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .user-value {
+      min-height: 0.38in;
+      font-size: 22px;
+      text-transform: uppercase;
+    }
+
+    .note-value {
+      min-height: 0.5in;
+      font-size: 18px;
+      line-height: 1.12;
+      text-transform: uppercase;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 0.12in;
+    }
+
+    .details-grid .wide {
+      grid-column: 1 / -1;
+    }
+
+    .detail-value {
+      font-size: 13px;
+      min-height: 0.24in;
+    }
+
+    .form-message {
+      display: none;
+      margin: 0 0 12px;
+      border: 1px solid var(--line);
+      padding: 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .form-message.visible {
+      display: block;
+    }
+
+    .screen-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    @media (max-width: 760px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @page {
+      size: letter;
+      margin: 0.45in;
+    }
+
+    @media print {
+      body {
+        background: var(--paper);
+      }
+
+      .app {
+        max-width: none;
+        padding: 0;
+      }
+
+      .topbar,
+      .entry-panel,
+      .screen-note {
+        display: none;
+      }
+
+      main,
+      .preview-wrap {
+        display: block;
+        border: 0;
+        padding: 0;
+        overflow: visible;
+      }
+
+      .print-sheet {
+        width: auto;
+        margin: 0;
+        padding: 0;
+      }
+
+      .tag {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <h1>Device Status Tag</h1>
+      <div class="actions">
+        <button type="button" id="clearBtn">Clear</button>
+        <button type="button" class="primary" id="printBtn">Print Tag</button>
+      </div>
+    </header>
+
+    <main>
+      <form class="entry-panel" id="tagForm" autocomplete="off">
+        <div class="form-message" id="formMessage">User is required when Status is Assigned.</div>
+
+        <p class="section-title">Top Section</p>
+        <div class="field">
+          <label for="status">Status</label>
+          <select id="status" name="status" data-output="statusOut" autofocus>
+            <option>In Stock</option>
+            <option>Assigned</option>
+            <option>Reimage</option>
+            <option>Repair</option>
+            <option>Hold</option>
+            <option>Retired</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="user">User</label>
+          <input id="user" name="user" data-output="userOut">
+        </div>
+
+        <div class="field">
+          <label for="issueNextStep">Issue / Next Step</label>
+          <textarea id="issueNextStep" name="issueNextStep" data-output="issueNextStepOut" rows="2" maxlength="80"></textarea>
+        </div>
+
+        <p class="section-title">Bottom Section</p>
+        <div class="field">
+          <label for="serial">Serial Number</label>
+          <input id="serial" name="serial" data-output="serialOut">
+        </div>
+
+        <div class="two-col">
+          <div class="field">
+            <label for="model">Model</label>
+            <input id="model" name="model" data-output="modelOut">
+          </div>
+
+          <div class="field">
+            <label for="location">Location</label>
+            <select id="location" name="location" data-output="locationOut">
+              <option>HOU</option>
+              <option>TWD</option>
+              <option>PIT</option>
+              <option>HH</option>
+              <option>AK</option>
+              <option>REMOTE</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="updated">Updated</label>
+            <input id="updated" name="updated" data-output="updatedOut" inputmode="numeric" placeholder="MM/DD/YY" maxlength="8">
+          </div>
+        </div>
+      </form>
+
+      <section class="preview-wrap" aria-label="Print preview">
+        <div class="print-sheet">
+          <div class="cut-wrap">
+            <article class="tag" id="printTag" data-status="In Stock">
+              <div class="tag-header">Device Status Tag</div>
+
+              <div class="top-section">
+                <div class="print-field">
+                  <span class="field-label">Status</span>
+                  <span class="field-value status-value" id="statusOut">In Stock</span>
+                </div>
+
+                <div class="print-field">
+                  <span class="field-label">User</span>
+                  <span class="field-value user-value" id="userOut">-</span>
+                </div>
+
+                <div class="print-field">
+                  <span class="field-label">Issue / Next Step</span>
+                  <span class="field-value note-value" id="issueNextStepOut">-</span>
+                </div>
+              </div>
+
+              <div class="bottom-section">
+                <div class="print-field">
+                  <span class="field-label">Serial Number</span>
+                  <span class="field-value detail-value" id="serialOut">-</span>
+                </div>
+
+                <div class="details-grid">
+                  <div class="print-field">
+                    <span class="field-label">Model</span>
+                    <span class="field-value detail-value" id="modelOut">-</span>
+                  </div>
+
+                  <div class="print-field">
+                    <span class="field-label">Location</span>
+                    <span class="field-value detail-value" id="locationOut">-</span>
+                  </div>
+
+                  <div class="print-field">
+                    <span class="field-label">Updated</span>
+                    <span class="field-value detail-value" id="updatedOut">-</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+        <div class="screen-note">Large top section is for sorting laptops quickly. Bottom section holds smaller permanent device details.</div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const form = document.getElementById("tagForm");
+    const clearBtn = document.getElementById("clearBtn");
+    const printBtn = document.getElementById("printBtn");
+    const status = document.getElementById("status");
+    const user = document.getElementById("user");
+    const updated = document.getElementById("updated");
+    const printTag = document.getElementById("printTag");
+    const formMessage = document.getElementById("formMessage");
+
+    function valueOrDash(value) {
+      return value.trim() || "-";
+    }
+
+    function formatDate(value) {
+      const digits = value.replace(/\D/g, "").slice(0, 6);
+      if (digits.length <= 2) {
+        return digits;
+      }
+      if (digits.length <= 4) {
+        return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+      }
+      return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+    }
+
+    function isAssignedWithoutUser() {
+      return status.value === "Assigned" && !user.value.trim();
+    }
+
+    function updatePreview() {
+      form.querySelectorAll("[data-output]").forEach((field) => {
+        const output = document.getElementById(field.dataset.output);
+        output.textContent = valueOrDash(field.value);
+      });
+
+      printTag.dataset.status = status.value;
+      user.required = status.value === "Assigned";
+      formMessage.classList.toggle("visible", isAssignedWithoutUser());
+    }
+
+    form.addEventListener("input", updatePreview);
+    form.addEventListener("change", updatePreview);
+
+    updated.addEventListener("input", () => {
+      const formatted = formatDate(updated.value);
+      if (updated.value !== formatted) {
+        updated.value = formatted;
+      }
+      updatePreview();
+    });
+
+    clearBtn.addEventListener("click", () => {
+      form.reset();
+      updatePreview();
+      document.getElementById("status").focus();
+    });
+
+    printBtn.addEventListener("click", () => {
+      updatePreview();
+      if (isAssignedWithoutUser()) {
+        user.focus();
+        return;
+      }
+      window.print();
+    });
+
+    updatePreview();
+  </script>
+</body>
+</html>
